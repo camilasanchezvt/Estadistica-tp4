@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<!--Yamila Sanchez, Valentina Olmos, Karina Maidana, Florencia Samprieto, Giuliana Manzo -->
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Alumnos</title>
+</head>
+
+<body>
+    <h2>Registro de Alumno</h2>
+
+    <form id="formulario">
+        <input type="text" name="Nombre" placeholder="Nombre" maxlength="255" required><br><br>
+        <input type="text" name="Apellido" placeholder="Apellido" maxlength="255" required><br><br>
+        <input type="text" name="DNI" placeholder="DNI" maxlength="15" required><br><br>
+        <input type="date" name="Fecha_de_nacimiento" required><br><br>
+        <!--  La etiqueta <br> en HTML se utiliza para hacer un salto de línea.
+            Cuando se usa <br><br>, se generan dos saltos de línea para separar visualmente los elementos,
+            especialmente útil cuando no se está utilizando CSS para espaciar los campos del formulario.
+            Es una forma rápida y simple de agregar espacio entre inputs.-->
+
+        <!--Select Menú desplegable para seleccionar el sexo del alumno -->
+        <select name="Sexo" required>
+            <option value="">Sexo</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+        </select><br><br>
+
+        <input type="number" name="Edad" placeholder="Edad" min="1" max="120" required><br><br>
+        <input type="number" name="ID_Curso" placeholder="ID Curso" required><br><br>
+        <input type="number" name="ID_Nivel" placeholder="ID Nivel (1 a 3)" min="1" max="3" required><br><br>
+
+        <button type="submit">Enviar</button>
+    </form>
+
+    <p id="resultado"></p>
+
+    <script>
+        const formulario = document.getElementById('formulario');
+        const resultado = document.getElementById('resultado');
+
+        // async permite usar await dentro de la función para esperar respuestas sin bloquear el código
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const datos = {
+                Nombre: formulario.Nombre.value,
+                Apellido: formulario.Apellido.value,
+                DNI: formulario.DNI.value,
+                Fecha_de_nacimiento: formulario.Fecha_de_nacimiento.value,
+                Sexo: formulario.Sexo.value,
+                Edad: parseInt(formulario.Edad.value),
+                ID_Curso: parseInt(formulario.ID_Curso.value),
+                ID_Nivel: parseInt(formulario.ID_Nivel.value)
+            };
+            try {
+                const respuesta = await fetch('https://apidemo.geoeducacion.com.ar/api/testing/formulario/1', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const resultadoJSON = await respuesta.json();
+
+                if (!resultadoJSON.success) {
+                    // Si la API responde con errores, lanzamos un error para manejarlo en catch
+                    throw new Error(Object.values(resultadoJSON.errors).flat().join(", "));
+                }
+
+                // Si todo salió bien, mostramos mensaje en verde
+                resultado.style.color = "green";
+                resultado.textContent = "✅ " + resultadoJSON.message;
+
+            } catch (error) {
+                // Si hubo error en la API o en la conexión, mostramos mensaje en rojo
+                resultado.style.color = "red";
+                resultado.textContent = "❌ " + (error.message || "Error al conectar con el servidor.");
+            }
+        });
+    </script>
+</body>
+
+</html>
+
